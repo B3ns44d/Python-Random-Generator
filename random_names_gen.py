@@ -1,33 +1,115 @@
-#! /usr/bin/env python3
-from pathlib import Path
-import argparse
+#! python3
+# -*- coding: utf-8 -*-
 import random
+import string
 
-def random_line(file_path):
-    line_num = 0
-    selected_line = ''
-    with file_path.open(mode="r") as fp:
-        while 1:
-            line = fp.readline()
-            if not line: break
-            line_num += 1
-            if random.uniform(0, line_num) < 1:
-                selected_line = line
-    return selected_line.strip()
+FirstNames    = './files/FirstNames.txt'
+MiddleNames   = './files/MiddleNames.txt'
+LastNames     = './files/LastNames.txt'
+CountyNames   = './files/CountyNames.txt'
+PlaceNames    = './files/PlaceNames.txt'
+StateNames    = './files/StateNames.txt'
+CountryNames  = './files/CountryNames.txt'
+CompanyNames  = './files/CompanyNames.txt'
 
-def random_names(number_of_names = 1):
-    first_names_file = Path("first_name.csv") 
-    last_names_file = Path("last_name.csv")
-    if first_names_file.is_file() and last_names_file.is_file(): # Check if file exists
-        for i in range(number_of_names):
-            random_first_name = random_line(first_names_file)
-            random_last_name = random_line(last_names_file)
-            print("This is your name:",f'{random_first_name} {random_last_name}')
+
+
+def Number(start=0, end=100000):
+    return random.randint(start, end)
+
+
+def UpperChars(NoOfChars=2):
+    _char = ''
+    for num in range(NoOfChars):
+        _char += random.choice(string.ascii_uppercase)
+    return _char
+
+
+def rawCount(filename):
+    with open(filename, 'rb') as f:
+        lines = 1
+        buf_size = 1024 * 1024
+        read_f = f.raw.read
+
+        buf = read_f(buf_size)
+        while buf:
+            lines += buf.count(b'\n')
+            buf = read_f(buf_size)
+        return lines
+
+
+def randomLine(filename):
+    num = int(random.uniform(0, rawCount(filename)))
+    with open(filename, 'r') as f:
+        for i, line in enumerate(f, 1):
+            if i == num:
+                break
+    return line.strip('\n')
+
+
+def First():
+    return randomLine(FirstNames)
+
+
+def Last():
+    return randomLine(LastNames)
+
+
+def Middle():
+    return randomLine(MiddleNames)
+
+
+def States():
+    return randomLine(StateNames)
+
+
+def Places():
+    return randomLine(PlaceNames)
+
+
+def County():
+    return randomLine(CountyNames)
+
+
+def Company():
+    return randomLine(CompanyNames)
+
+
+def Country():
+    _Cc = randomLine(CountryNames)
+    _Cc = _Cc.split('|')
+    return _Cc[1]
+
+
+def CountryCode():
+    _Cc = randomLine(CountryNames)
+    _Cc = _Cc.split('|')
+    return _Cc[0]
+
+
+def StateCode():
+    return States().split(', ')[1]
+
+
+def Full():
+    return ' '.join([First(), Last()])
+
+
+def Address():
+    _door = str(Number(11, 99))
+    _zip  = str(Number(1000, 9999))
+    _adrs = ', '.join([Places(), County(), States(), _zip])
+    _adrs = _door + UpperChars(1) + ' - ' + _adrs + '.'
+    return _adrs
+
+
+def ShortAddress():
+    _door = str(Number(11, 99))
+    _zip  = str(Number(1000, 9999))
+    _adrs = ', '.join([County(), States(), _zip])
+    _adrs = _door + ' ' + _adrs
+    return _adrs
+
 
 if __name__ == '__main__':
-    # Accept command line argument for number of names required where default is 1
-    parser = argparse.ArgumentParser(description='Generate Random Names')
-    parser.add_argument('num', nargs='?', type=int, default=1)
-    args = parser.parse_args()
-    random_names(args.num)
-
+    print('Full name is ',Full(), 'Works at ', Company(), ' Lives at ', Address(), StateCode(), Country())
